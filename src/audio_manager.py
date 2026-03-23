@@ -53,7 +53,7 @@ def _generate_fallback_beep() -> pygame.mixer.Sound:
     n_samples = int(sample_rate * 1.0)
     samples = array.array("h")
     for i in range(n_samples):
-        val = int(32767 * 0.6 * math.sin(2 * math.pi * 440.0 * i / sample_rate))
+        val = int(32767 * 0.9 * math.sin(2 * math.pi * 440.0 * i / sample_rate))
         samples.append(val)
         samples.append(val)
     return pygame.mixer.Sound(buffer=samples)
@@ -98,6 +98,7 @@ class _NativeSpeech:
             self._ps_proc.stdin.write(
                 b"$voice = New-Object -ComObject SAPI.SpVoice\r\n"
                 b"$voice.Rate = 2\r\n"
+                b"$voice.Volume = 100\r\n"
             )
             self._ps_proc.stdin.flush()
             self._available = True
@@ -201,6 +202,7 @@ class AudioManager:
         log.info("Loading hooter from: %s", hooter_path)
         try:
             self._hooter_sound = pygame.mixer.Sound(hooter_path)
+            self._hooter_sound.set_volume(1.0)
             log.info("Hooter sound loaded (length=%.1fs)", self._hooter_sound.get_length())
         except Exception as exc:
             log.warning("Could not load hooter.mp3 (%s), generating fallback beep", exc)

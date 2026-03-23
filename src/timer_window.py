@@ -79,6 +79,7 @@ class TimerWindow(QMainWindow):
         self._current_race_info: dict | None = None
         self._last_race_number: int | None = None
         self._in_countdown = False
+        self._countdown_font_is_large: bool | None = None
 
         # Core components
         self._audio = AudioManager()
@@ -250,12 +251,25 @@ class TimerWindow(QMainWindow):
         self._vs_size_large = max(20, int(h * 0.04))
         tag_size = max(9, int(h * 0.015))
 
-        self._countdown_label.setFont(_bold_font("Segoe UI", self._countdown_font_large))
+        # Reserve a fixed height for the countdown area based on the large
+        # font so the layout never shifts when switching between states.
+        self._countdown_label.setFixedHeight(int(self._countdown_font_large * 1.25))
+
+        self._countdown_font_is_large = None
+        self._set_countdown_font(large=True)
         self._race_label.setFont(_bold_font("Segoe UI", self._race_size))
         self._stage_label.setFont(_bold_font("Segoe UI", self._stage_size))
         self._subtitle_label.setFont(QFont("Segoe UI", self._subtitle_size))
         self._set_team_fonts(large=False)
         self._tag_font_size = tag_size
+
+    def _set_countdown_font(self, large: bool):
+        """Only update the countdown font when the size category changes."""
+        if self._countdown_font_is_large == large:
+            return
+        self._countdown_font_is_large = large
+        size = self._countdown_font_large if large else self._countdown_font_small
+        self._countdown_label.setFont(_bold_font("Segoe UI", size))
 
     def _set_team_fonts(self, large: bool = False):
         if large:
@@ -354,7 +368,7 @@ class TimerWindow(QMainWindow):
         self._in_countdown = False
         self._stage_label.hide()
         self._race_label.setText("")
-        self._countdown_label.setFont(_bold_font("Segoe UI", self._countdown_font_small))
+        self._set_countdown_font(large=False)
         self._countdown_label.setText("...")
         self._countdown_label.setStyleSheet("color: #60a5fa;")
         self._subtitle_label.setText("Syncing Time")
@@ -391,7 +405,7 @@ class TimerWindow(QMainWindow):
                 display = str(total_sec)
             self._countdown_label.setStyleSheet("color: #facc15;")
 
-        self._countdown_label.setFont(_bold_font("Segoe UI", self._countdown_font_large))
+        self._set_countdown_font(large=True)
         self._countdown_label.setText(display)
         self._subtitle_label.setText("Starts in")
         self._subtitle_label.show()
@@ -409,7 +423,7 @@ class TimerWindow(QMainWindow):
         if self._last_race_number != race_num:
             self._last_race_number = race_num
 
-        self._countdown_label.setFont(_bold_font("Segoe UI", self._countdown_font_small))
+        self._set_countdown_font(large=False)
         self._countdown_label.setText("Coming Up")
         self._countdown_label.setStyleSheet("color: #facc15;")
         self._subtitle_label.setText("Next Race")
@@ -422,7 +436,7 @@ class TimerWindow(QMainWindow):
         self._in_countdown = False
         self._stage_label.hide()
         self._race_label.setText("")
-        self._countdown_label.setFont(_bold_font("Segoe UI", self._countdown_font_small))
+        self._set_countdown_font(large=False)
         self._countdown_label.setText("No Races")
         self._countdown_label.setStyleSheet("color: #6b7280;")
         self._subtitle_label.setText("No races scheduled or in progress")
