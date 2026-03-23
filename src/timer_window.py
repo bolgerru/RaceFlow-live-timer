@@ -1,5 +1,7 @@
 """Main timer window: countdown display, race info, status indicators."""
 
+from __future__ import annotations
+
 import logging
 
 from PyQt6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve

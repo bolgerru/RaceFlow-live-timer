@@ -1,5 +1,7 @@
 """Audio manager: hooter playback via pygame, speech via native OS TTS, threshold crossing logic."""
 
+from __future__ import annotations
+
 import array
 import logging
 import math

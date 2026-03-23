@@ -1,5 +1,7 @@
 """Race selection logic: finding current/next race, knockout series status, winner calculation."""
 
+from __future__ import annotations
+
 import math
 from datetime import datetime, timezone
 
