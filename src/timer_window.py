@@ -16,14 +16,14 @@ from PyQt6.QtWidgets import (
     QGraphicsOpacityEffect,
 )
 
+import requests
+
 from api_client import ApiClient
 from audio_manager import AudioManager
 from race_logic import find_current_race, find_next_race, get_race_display_info
 from config import save_config
 
 log = logging.getLogger(__name__)
-
-SERVER_URL = "https://teamracing.xyz"
 
 
 def _bold_font(family: str, size: int, weight: QFont.Weight = QFont.Weight.Bold) -> QFont:
@@ -71,7 +71,14 @@ class _PillLabel(QLabel):
 class TimerWindow(QMainWindow):
     """Full-screen countdown timer window."""
 
-    def __init__(self, audio_mode: str, parent=None):
+    def __init__(
+        self,
+        audio_mode: str,
+        api_base_url: str,
+        event_id: str,
+        session: requests.Session | None = None,
+        parent=None,
+    ):
         super().__init__(parent)
         self.setWindowTitle("Sailing Race Timer")
         self.setStyleSheet("background-color: black;")
@@ -87,7 +94,7 @@ class TimerWindow(QMainWindow):
         self._audio = AudioManager()
         self._audio.mode = audio_mode
 
-        self._api = ApiClient(SERVER_URL)
+        self._api = ApiClient(api_base_url, event_id, session=session)
         self._api.schedule_updated.connect(self._on_schedule_updated)
         self._api.connection_status.connect(self._on_connection_status)
         self._api.sync_status.connect(self._on_sync_status)

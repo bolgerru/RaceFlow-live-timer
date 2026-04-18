@@ -39,10 +39,13 @@ def load_config() -> dict:
 
 
 def save_config(data: dict):
+    """Merge into existing config on disk so partial updates do not erase other keys."""
     path = _config_path()
+    cfg = load_config()
+    cfg.update(data)
     try:
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
+            json.dump(cfg, f, indent=2)
     except Exception:
         pass
 

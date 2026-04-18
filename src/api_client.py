@@ -6,6 +6,8 @@ import logging
 import requests
 from PyQt6.QtCore import QThread, pyqtSignal
 
+from events_api import event_params
+
 log = logging.getLogger(__name__)
 
 POLL_INTERVAL_S = 1.0
@@ -21,9 +23,17 @@ class ApiClient(QThread):
     connection_status = pyqtSignal(bool)
     sync_status = pyqtSignal(str)  # "syncing" | "synced" | "fallback"
 
-    def __init__(self, server_url: str, parent=None):
+    def __init__(
+        self,
+        server_url: str,
+        event_id: str,
+        session: requests.Session | None = None,
+        parent=None,
+    ):
         super().__init__(parent)
         self._server_url = server_url.rstrip("/")
+        self._event_id = str(event_id)
+        self._session = session if session is not None else requests.Session()
         self._running = True
         self._offset_ms: float = 0.0
         self._best_rtt_ms: float = float("inf")
@@ -51,8 +61,9 @@ class ApiClient(QThread):
 
     def _poll_schedule(self):
         try:
-            resp = requests.get(
+            resp = self._session.get(
                 f"{self._server_url}/api/schedule",
+                params=event_params(self._event_id),
                 timeout=REQUEST_TIMEOUT_S,
             )
             resp.raise_for_status()
@@ -74,8 +85,9 @@ class ApiClient(QThread):
 
         try:
             t_start = time.time() * 1000
-            resp = requests.post(
+            resp = self._session.post(
                 f"{self._server_url}/api/time-sync/init",
+                params=event_params(self._event_id),
                 json={"clientTime": t_start},
                 timeout=REQUEST_TIMEOUT_S,
             )

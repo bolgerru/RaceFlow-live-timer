@@ -1,5 +1,7 @@
 PyQt6
-pygame
+# pygame-ce is API-compatible with pygame (`import pygame`) and ships wheels for newer
+# Python versions (e.g. 3.14) where plain `pygame` often fails to build on Windows.
+pygame-ce>=2.5.0
 pyttsx3
 requests
 pyinstaller
